@@ -80,8 +80,27 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('#lastName').type('Saadeh')
         cy.get('#email').type('grumalegal@gmail.com')
         cy.get('#open-text-area').type(longText, { delay: 0 })
-        cy.contains('button','Enviar').click()
+        cy.contains('button', 'Enviar').click()
 
         cy.get('.success').should('be.visible')
+    })
+
+    it('seleciona um produto (YouTube) por seu texto', () => {
+        cy.get('#product')
+            .select('YouTube')
+            .should('have.value', 'youtube')
+            .should('contain', 'YouTube')
+    })
+
+    it('seleciona um produto (Mentoria) por seu valor (value)', () => {
+        cy.get('#product')
+            .select('mentoria')
+            .should('have.value', 'mentoria')
+    })
+
+    it('seleciona um produto (Blog) por seu índice', () => {
+        cy.get('#product')
+            .select(1)
+            .should('have.value', 'blog')
     })
 })

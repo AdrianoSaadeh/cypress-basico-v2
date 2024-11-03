@@ -1,7 +1,7 @@
 /// <reference types="Cypress" />
 
 describe('Central de Atendimento ao Cliente TAT', function () {
-
+    const THREE_SECONDS_IN_MS = 3000
     beforeEach(() => {
         cy.visit('./src/index.html')
     })
@@ -23,6 +23,8 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     })
 
     it('exibe mensagem de erro ao submeter o formulário com um email com formatação inválida', function () {
+        cy.clock()
+
         cy.get('#firstName').type('Adriano')
         cy.get('#lastName').type('Saadeh')
         cy.get('#email').type('www.grumalegalgmail.com')
@@ -30,6 +32,8 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.get('button[type="submit"]').click()
 
         cy.get('.error').should('be.visible')
+        cy.tick(THREE_SECONDS_IN_MS)
+        cy.get('.error').should('not.be.visible')
     })
 
     it('campo telefone continua vazio quando preenchido com valor não numérico', function () {
@@ -76,6 +80,8 @@ describe('Central de Atendimento ao Cliente TAT', function () {
     it('envia o formuário com sucesso usando o cy.contains ao invés do cy.get', () => {
         const longText = 'teste teste teste testeteste teste teste teste teste teste teste testetesteteste teste  teste'
 
+        cy.clock()
+
         cy.get('#firstName').type('Adriano')
         cy.get('#lastName').type('Saadeh')
         cy.get('#email').type('grumalegal@gmail.com')
@@ -83,6 +89,11 @@ describe('Central de Atendimento ao Cliente TAT', function () {
         cy.contains('button', 'Enviar').click()
 
         cy.get('.success').should('be.visible')
+
+        cy.tick(THREE_SECONDS_IN_MS)
+
+        cy.get('.success').should('not.be.visible')
+
     })
 
     it('seleciona um produto (YouTube) por seu texto', () => {
@@ -176,6 +187,44 @@ describe('Central de Atendimento ao Cliente TAT', function () {
             .click()
 
         cy.contains('Talking About Testing').should('be.visible')
+    })
+
+    it('exibe e esconde as mensagens de sucesso e erro usando o .invoke', () => {
+        cy.get('.success')
+            .should('not.be.visible')
+            .invoke('show')
+            .should('be.visible')
+            .and('contain', 'Mensagem enviada com sucesso.')
+            .invoke('hide')
+            .should('not.be.visible')
+        cy.get('.error')
+            .should('not.be.visible')
+            .invoke('show')
+            .should('be.visible')
+            .and('contain', 'Valide os campos obrigatórios!')
+            .invoke('hide')
+            .should('not.be.visible')
+    })
+
+    //Usando o LoDash
+    it('preenche a area de texto usando o comando invoke', () => {
+        const longText = Cypress._.repeat('Adriano demais ', 20)
+
+        cy.get('textarea')
+            .invoke('val', longText)
+            .should('have.value', longText)
+    })
+
+    it.only('faz uma requisição HTTP', () => {
+        cy.request({
+            method: 'GET',
+            url: 'https://cac-tat.s3.eu-central-1.amazonaws.com/index.html'
+        }).should((response) => {
+            const { status, statusText, body } = response
+            expect(status).to.equal(200)
+            expect(statusText).to.equal('OK')
+            expect(body).to.include('CAC TAT')
+        })
     })
 
 })
